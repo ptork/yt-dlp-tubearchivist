@@ -128,12 +128,15 @@ class TubeArchivistPluginIE(InfoExtractor):
     channel_json = self._api_call(channel_url, channel_id, token, 'channel')
     
     playlist_video = f"{base_url}/api/playlist/{playlist_id}/video/"
-    playlist_video_json = self._api_call(playlist_video, playlist_id, token, 'playlist videos')
-
-    entries = [
-      self._extract_video(entry['youtube_id'], base_url, token)
-      for entry in playlist_video_json['data']
-    ]
+    try:
+      playlist_video_json = self._api_call(playlist_video, playlist_id, token, 'playlist videos')
+      entries = [
+        self._extract_video(entry['youtube_id'], base_url, token)
+        for entry in playlist_video_json['data']
+      ]
+    except Exception as e:
+      self.to_screen(f"Playlist videos API returned an error: {e}")
+      entries = []
 
     return {
       '_type': 'playlist',
@@ -151,14 +154,19 @@ class TubeArchivistPluginIE(InfoExtractor):
     channel_videos_url = f"{base_url}/api/channel/{channel_id}/video/"
   
     channel_json = self._api_call(channel_url, channel_id, token, 'channel')
-    videos_json = self._api_call(channel_videos_url, channel_id, token, 'channel videos')
+    try:
+      videos_json = self._api_call(channel_videos_url, channel_id, token, 'channel videos')
+      entries = [self._parse_video(base_url, video) for video in videos_json['data']]
+    except Exception as e:
+      self.to_screen(f"Channel videos API returned an error: {e}")
+      entries = []
   
     result = {
       **self._parse_channel(base_url, channel_json['data']),
-      'entries': [self._parse_video(base_url, video) for video in videos_json['data']]
+      'entries': entries
     }
     
-    self.to_screen(f'Found {len(videos_json["data"])} videos in channel "{channel_json["data"]["channel_name"]}"')
+    self.to_screen(f'Found {len(entries)} videos in channel "{channel_json["data"]["channel_name"]}"')
     return result
 
   def _extract_video(self, video_id, base_url, token):
