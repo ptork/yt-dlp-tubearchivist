@@ -56,7 +56,7 @@ class TubeArchivistPluginIE(InfoExtractor):
       'tags': json['channel_tags'],
       'modified_date': json['channel_last_refresh'].replace('-',''),
       'view_count': json['channel_views'],
-      'thumbnail': f"{base_url}/{json['channel_thumb_url']}",
+      'thumbnail': f"{base_url}{json['channel_thumb_url']}",
       'channel_banner_url': f"{base_url}/{json['channel_banner_url']}",
       'channel_url': f"{base_url}/channel/{json['channel_id']}",
       'webpage_url': f"{base_url}/channel/{json['channel_id']}"
@@ -77,7 +77,7 @@ class TubeArchivistPluginIE(InfoExtractor):
       'format': 'mp4',
       'player_url': media_url,
       'duration': json['player']['duration'],
-      'thumbnail': f"{base_url}/{json['vid_thumb_url']}",
+      'thumbnail': f"{base_url}{json['vid_thumb_url']}",
       'description': json['description'],
       'upload_date': json['published'].replace('-', ''),
       'view_count': json['stats']['view_count'],
